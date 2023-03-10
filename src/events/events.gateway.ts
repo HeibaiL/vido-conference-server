@@ -1,19 +1,12 @@
-import {
-  SubscribeMessage,
-  MessageBody,
-  ConnectedSocket,
-} from '@nestjs/websockets';
-import { Socket } from 'net';
+import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
 
+@WebSocketGateway({ cors: true })
 export class EventsGateway {
-  @SubscribeMessage('room-connection')
-  handleEvent(
-    @MessageBody('room-id') id: string,
-    @ConnectedSocket() client: Socket,
-  ): object {
-    const event = 'room-connection';
-    client.emit('room-id', { id });
-    return { event, id };
+  @SubscribeMessage('connection')
+  handleMessage(client: Socket, payload: string): void {
+    client.emit('stream', 'blabla');
   }
 }
+
 export default EventsGateway;

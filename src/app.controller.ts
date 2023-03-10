@@ -6,9 +6,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  async getHello(): Promise<string> {
-    return await new Promise((res) => {
-      setTimeout(() => res(this.appService.getHello()), 3000);
-    });
+  getHello(): string {
+    return 'ws connection';
   }
 }
