@@ -1,23 +1,35 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
-import { v4 as uuidv4 } from 'uuid';
 
 @WebSocketGateway({ cors: true })
 export class EventsGateway {
+  allClients = [];
+
   @SubscribeMessage('connection')
-  handleConnection(client: Socket, payload: string): void {
-    const roomId = uuidv4();
-    client.on('getRoom', () => {
-      console.log('GetR');
-      client.emit('getRoom', roomId);
-    });
-    client.on('joinRoom', (roomId) => {
-      console.log('joinRoom', roomId);
+  handleConnection(client: Socket): void {
+    client.on('joinRoom', (roomId, userId) => {
+      this.allClients.push({ ...client, userId });
+
       client.join(roomId);
-      client.to(roomId).emit('userConnected', roomId);
-    });
-    client.on('disconnect', () => {
-      console.log('disconnect');
+      client.to(roomId).emit('userConnected', userId);
+
+      client.emit(
+        'roomsClients',
+        this.allClients
+          .filter((client) => client.userId !== userId)
+          .map((client) => client.id),
+      );
+
+      client.on('leaveRoom', (roomId, userId) => {
+        client.to(roomId).emit('userDisconnected', userId);
+      });
+
+      client.on('disconnect', () => {
+        this.allClients = this.allClients.filter(
+          (client) => client.userId !== userId,
+        );
+        client.to(roomId).emit('userDisconnected', userId);
+      });
     });
   }
 }
