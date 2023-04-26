@@ -13,13 +13,6 @@ export class EventsGateway {
       client.join(roomId);
       client.to(roomId).emit('userConnected', userId);
 
-      client.emit(
-        'roomsClients',
-        this.allClients
-          .filter((client) => client.userId !== userId)
-          .map((client) => client.id),
-      );
-
       client.on('leaveRoom', (roomId, userId) => {
         client.to(roomId).emit('userDisconnected', userId);
       });
