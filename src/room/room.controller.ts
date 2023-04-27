@@ -11,7 +11,6 @@ export class RoomController {
 
   @Get()
   getRoom(): GetRoomResponse {
-    console.log('qq');
     return { roomId: this.roomService.generateRoomId() };
   }
 }
